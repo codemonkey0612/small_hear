@@ -1,0 +1,5 @@
+2026-04-03 22:28:55,017 INFO    Starting Time Tracker (idle threshold: 60s)
+2026-04-03 22:28:55,251 INFO    Restored today's totals
+2026-04-03 22:28:55,252 INFO    LockMonitor: polling started
+2026-04-03 22:28:55,252 INFO    All components started
+2026-04-03 22:28:56,606 INFO    Tray icon visible
