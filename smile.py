@@ -87,8 +87,10 @@ def main():
     log.info("Starting smile")
 
     from tracker.state_machine import StateMachine
-    from tracker.tray          import TrayIcon
-    from tracker               import persistence
+    from tracker.idle_monitor   import IdleMonitor, IDLE_THRESHOLD_SEC
+    from tracker.lock_monitor   import LockMonitor
+    from tracker.tray           import TrayIcon
+    from tracker                import persistence
 
     sm = StateMachine()
 
@@ -96,6 +98,10 @@ def main():
     if saved and saved.get("date") == date.today().isoformat():
         sm.preload(float(saved.get("active_seconds", 0)))
         log.info("Restored today's active time")
+
+    IdleMonitor(sm)
+    LockMonitor(sm).start()
+    log.info("Idle threshold: %ds", IDLE_THRESHOLD_SEC)
 
     def _save():
         secs, date_str, _ = sm.snapshot()
