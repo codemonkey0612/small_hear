@@ -1,5 +1,5 @@
 """
-System tray icon — displays current ACTIVE hours as a number.
+System tray icon — displays active hours as a number.
 Right-click menu: Pause / Resume / Quit.
 """
 
@@ -9,15 +9,10 @@ import logging
 
 import pystray
 from PIL import Image, ImageDraw, ImageFont
-from tracker.state_machine import State
 
 
-_STATE_COLOR = {
-    "ACTIVE": "#22c55e",
-    "IDLE":   "#f59e0b",
-    "LOCK":   "#ef4444",
-    "PAUSED": "#64748b",
-}
+_COLOR_RUNNING = "#22c55e"
+_COLOR_PAUSED  = "#64748b"
 
 
 def _load_font(size: int):
@@ -32,9 +27,9 @@ def _load_font(size: int):
 _FONT = _load_font(40)
 
 
-def _make_icon(hours: float, label: str) -> Image.Image:
-    color = _STATE_COLOR.get(label, "#cdd6f4")
-    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+def _make_icon(hours: float, paused: bool) -> Image.Image:
+    color = _COLOR_PAUSED if paused else _COLOR_RUNNING
+    img  = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     text = f"{hours:.1f}"
     bbox = draw.textbbox((0, 0), text, font=_FONT)
@@ -62,9 +57,9 @@ class TrayIcon:
             pystray.MenuItem("Quit",   self._do_quit),
         )
         self._icon = pystray.Icon(
-            "TimeTracker",
-            icon=_make_icon(0.0, "ACTIVE"),
-            title="Time Tracker",
+            "smile",
+            icon=_make_icon(0.0, False),
+            title="smile",
             menu=menu,
         )
         threading.Thread(target=self._refresh_loop, daemon=True).start()
@@ -72,32 +67,32 @@ class TrayIcon:
 
     def _refresh_loop(self):
         last_text = None
-        last_label = None
+        last_paused = None
         while True:
             time.sleep(1)
             if not self._icon:
                 continue
-            totals, _, state, paused = self._sm.snapshot()
-            hours = totals.get(State.ACTIVE, 0) / 3600
-            label = "PAUSED" if paused else state.value
+            self._sm.tick()
+            secs, _, paused = self._sm.snapshot()
+            hours = secs / 3600
             text = f"{hours:.1f}"
-            if text == last_text and label == last_label:
+            if text == last_text and paused == last_paused:
                 continue
-            last_text, last_label = text, label
+            last_text, last_paused = text, paused
             try:
-                self._icon.icon  = _make_icon(hours, label)
-                self._icon.title = f"Time Tracker — {label}: {hours:.1f}h"
+                self._icon.icon  = _make_icon(hours, paused)
+                self._icon.title = (
+                    f"smile — PAUSED: {hours:.1f}h" if paused
+                    else f"smile — {hours:.1f}h"
+                )
             except Exception:
                 pass
 
     def _do_pause(self, icon=None, item=None):
-        logging.info("Paused")
         self._on_pause()
 
     def _do_resume(self, icon=None, item=None):
-        logging.info("Resumed")
         self._on_resume()
 
     def _do_quit(self, icon=None, item=None):
-        logging.info("Quit")
         self._on_quit()

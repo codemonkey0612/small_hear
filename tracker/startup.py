@@ -4,17 +4,17 @@ import pathlib
 import logging
 
 REG_PATH = r"Software\Microsoft\Windows\CurrentVersion\Run"
-APP_NAME = "WindowsTimeTracker"
+APP_NAME = "smile"
 
 
 def register():
     """Add this app to Windows startup (HKCU, no admin required)."""
-    # When frozen by PyInstaller, sys.executable IS the built TimeTracker.exe
+    # When frozen by PyInstaller, sys.executable IS the built smile.exe
     if getattr(sys, 'frozen', False):
         cmd = f'"{sys.executable}"'
     else:
         root = pathlib.Path(__file__).resolve().parent.parent
-        named_exe = root / "TimeTracker.exe"
+        named_exe = root / "smile.exe"
         if named_exe.exists():
             launcher = named_exe
         else:
@@ -22,7 +22,7 @@ def register():
             launcher = exe.parent / "pythonw.exe"
             if not launcher.exists():
                 launcher = exe
-        script = str(root / "time_tracker.py")
+        script = str(root / "smile.py")
         cmd = f'"{launcher}" "{script}"'
 
     try:
