@@ -43,10 +43,7 @@ def _make_icon(state: str) -> Image.Image:
 
 def _fmt(secs: float) -> str:
     secs = max(0.0, secs)
-    h = int(secs // 3600)
-    m = int((secs % 3600) // 60)
-    s = int(secs % 60)
-    return f"{h:02d}:{m:02d}:{s:02d}"
+    return f"{secs / 3600:.1f}"
 
 def _pct(part: float, total: float) -> str:
     return f"{part / total * 100:.0f}%" if total > 0 else "0%"

@@ -4,7 +4,7 @@ block_cipher = None
 
 a = Analysis(
     ['time_tracker.py'],
-    pathex=['F:/time_tracker'],
+    pathex=['.'],
     binaries=[],
     datas=[('config.py', '.')],
     hiddenimports=[
